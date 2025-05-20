@@ -1,91 +1,96 @@
 import pandas as pd
 import streamlit as st
-from PIL import Image
-import numpy as np
 from datetime import datetime
 
 # Page configuration
 st.set_page_config(
     page_title="Análisis de Sensores - Mi Ciudad",
-    page_icon="📊",
+    page_icon="✨",
     layout="wide"
 )
 
-# Custom CSS for aesthetics
-st.markdown("""
+# Custom CSS for styling
+st.markdown(
+    """
     <style>
-    /* Background gradient */
-    .main {
-        background: linear-gradient(to bottom right, #ffe6f7, #e6ccff);
-        padding: 2rem;
-    }
+        /* General background and font */
+        body {
+            background-color: #f6f0e9;
+            font-family: 'Times New Roman', serif;
+        }
 
-    /* Header and titles */
-    h1, h2, h3, h4 {
-        color: #ffb6c1; /* Pastel pink */
-        font-family: 'Times New Roman', Times, serif;
-    }
+        /* Title styles */
+        .title {
+            text-align: center;
+            color: #a0896b;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
 
-    /* General text */
-    body, div, p, span, label {
-        font-family: 'Times New Roman', Times, serif;
-    }
+        /* Subtitle styles */
+        .subtitle {
+            text-align: center;
+            color: #b3a394;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
 
-    /* Sidebar styling */
-    .css-6qob1r {
-        background: linear-gradient(to bottom, #ffccff, #e6b3ff);
-    }
+        /* Tabs background */
+        .stTabs [data-baseweb="tab-list"] {
+            background-color: #d9cfc2;
+            border-radius: 10px;
+            padding: 0.5rem;
+        }
 
-    /* Metrics styling */
-    .metric-container {
-        border-radius: 8px;
-        background: #f9e6ff;
-        padding: 1rem;
-    }
+        .stTabs [data-baseweb="tab"] {
+            color: #5c5343;
+            font-weight: bold;
+        }
 
-    /* Alerts and warnings */
-    .stAlert {
-        background: #ffe6f7;
-        border-left: 5px solid #cc0099;
-    }
+        /* Section headers */
+        .stContainer h2 {
+            text-align: center;
+            color: #a0896b;
+        }
 
-    /* Tabs background */
-    .stTabs [role="tablist"] {
-        background-color: #dab3ff; /* Light purple */
-        padding: 0.5rem;
-        border-radius: 8px;
-    }
+        /* Buttons and metrics */
+        .stButton button {
+            background-color: #a0896b;
+            color: #fff;
+            border-radius: 8px;
+        }
 
-    /* Footer */
-    .footer {
-        text-align: center;
-        color: #993399;
-        margin-top: 2rem;
-        font-size: 0.9rem;
-    }
+        .stMetric {
+            background-color: #f2e8dc;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        /* Dataframe styles */
+        .stDataFrame {
+            border: 1px solid #d9cfc2;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #a0896b;
+            margin-top: 2rem;
+        }
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
 
 # Title and description
-st.title('📊 Análisis de datos de Sensores en Mi Ciudad')
-st.markdown("""
-    Esta aplicación permite analizar datos de temperatura y humedad
-    recolectados por sensores ESP32 en diferentes puntos de la ciudad.
-""")
-
-# Create map data for EAFIT
-eafit_location = pd.DataFrame({
-    'lat': [6.2006],
-    'lon': [-75.5783],
-    'location': ['Universidad EAFIT']
-})
-
-# Display map
-st.subheader("📍 Ubicación de los Sensores - Universidad EAFIT")
-st.map(eafit_location, zoom=15)
+st.markdown('<h1 class="title">✨ Análisis de Sensores ✨</h1>', unsafe_allow_html=True)
+st.markdown('<h2 class="subtitle">Analiza datos recolectados por sensores ESP32 en tu ciudad</h2>', unsafe_allow_html=True)
 
 # File uploader
-uploaded_file = st.file_uploader('Seleccione archivo CSV', type=['csv'])
+uploaded_file = st.file_uploader('Seleccione archivo CSV para analizar', type=['csv'])
 
 if uploaded_file is not None:
     try:
@@ -103,10 +108,10 @@ if uploaded_file is not None:
         df1 = df1.set_index('Time')
 
         # Create tabs for different analyses
-        tab1, tab2, tab3, tab4 = st.tabs(["📈 Visualización", "📊 Estadísticas", "🔍 Filtros", "🗺️ Información del Sitio"])
+        tab1, tab2, tab3 = st.tabs(["📈 Visualización", "📊 Estadísticas", "🔍 Filtros"])
 
         with tab1:
-            st.subheader('Visualización de Datos')
+            st.markdown('<h2>Visualización de Datos</h2>', unsafe_allow_html=True)
 
             # Variable selector
             variable = st.selectbox(
@@ -145,12 +150,8 @@ if uploaded_file is not None:
                 else:
                     st.bar_chart(df1[variable])
 
-            # Raw data display with toggle
-            if st.checkbox('Mostrar datos crudos'):
-                st.write(df1)
-
         with tab2:
-            st.subheader('Análisis Estadístico')
+            st.markdown('<h2>Análisis Estadístico</h2>', unsafe_allow_html=True)
 
             # Variable selector for statistics
             stat_variable = st.radio(
@@ -160,25 +161,10 @@ if uploaded_file is not None:
 
             # Statistical summary
             stats_df = df1[stat_variable].describe()
-
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.dataframe(stats_df)
-
-            with col2:
-                # Additional statistics
-                if stat_variable == "temperatura":
-                    st.metric("Temperatura Promedio", f"{stats_df['mean']:.2f}°C")
-                    st.metric("Temperatura Máxima", f"{stats_df['max']:.2f}°C")
-                    st.metric("Temperatura Mínima", f"{stats_df['min']:.2f}°C")
-                else:
-                    st.metric("Humedad Promedio", f"{stats_df['mean']:.2f}%")
-                    st.metric("Humedad Máxima", f"{stats_df['max']:.2f}%")
-                    st.metric("Humedad Mínima", f"{stats_df['min']:.2f}%")
+            st.dataframe(stats_df)
 
         with tab3:
-            st.subheader('Filtros de Datos')
+            st.markdown('<h2>Filtros de Datos</h2>', unsafe_allow_html=True)
 
             # Variable selector for filtering
             filter_variable = st.selectbox(
@@ -186,69 +172,18 @@ if uploaded_file is not None:
                 ["temperatura", "humedad"]
             )
 
-            col1, col2 = st.columns(2)
+            # Minimum value filter
+            min_val = st.slider(
+                f'Valor mínimo de {filter_variable}',
+                float(df1[filter_variable].min()),
+                float(df1[filter_variable].max()),
+                float(df1[filter_variable].mean()),
+                key="min_val"
+            )
 
-            with col1:
-                # Minimum value filter
-                min_val = st.slider(
-                    f'Valor mínimo de {filter_variable}',
-                    float(df1[filter_variable].min()),
-                    float(df1[filter_variable].max()),
-                    float(df1[filter_variable].mean()),
-                    key="min_val"
-                )
-
-                filtrado_df_min = df1[df1[filter_variable] > min_val]
-                st.write(f"Registros con {filter_variable} superior a", 
-                        f"{min_val}{'°C' if filter_variable == 'temperatura' else '%'}:")
-                st.dataframe(filtrado_df_min)
-
-            with col2:
-                # Maximum value filter
-                max_val = st.slider(
-                    f'Valor máximo de {filter_variable}',
-                    float(df1[filter_variable].min()),
-                    float(df1[filter_variable].max()),
-                    float(df1[filter_variable].mean()),
-                    key="max_val"
-                )
-
-                filtrado_df_max = df1[df1[filter_variable] < max_val]
-                st.write(f"Registros con {filter_variable} inferior a",
-                        f"{max_val}{'°C' if filter_variable == 'temperatura' else '%'}:")
-                st.dataframe(filtrado_df_max)
-
-            # Download filtered data
-            if st.button('Descargar datos filtrados'):
-                csv = filtrado_df_min.to_csv().encode('utf-8')
-                st.download_button(
-                    label="Descargar CSV",
-                    data=csv,
-                    file_name='datos_filtrados.csv',
-                    mime='text/csv',
-                )
-
-        with tab4:
-            st.subheader("Información del Sitio de Medición")
-
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.write("### Ubicación del Sensor")
-                st.write("**Universidad EAFIT**")
-                st.write("- Latitud: 6.2006")
-                st.write("- Longitud: -75.5783")
-                st.write("- Altitud: ~1,495 metros sobre el nivel del mar")
-
-            with col2:
-                st.write("### Detalles del Sensor")
-                st.write("- Tipo: ESP32")
-                st.write("- Variables medidas:")
-                st.write("  * Temperatura (°C)")
-                st.write("  * Humedad (%)")
-                st.write("- Frecuencia de medición: Según configuración")
-                st.write("- Ubicación: Campus universitario")
-
+            filtrado_df_min = df1[df1[filter_variable] > min_val]
+            st.write(f"Registros con {filter_variable} superior a {min_val}:")
+            st.dataframe(filtrado_df_min)
 
     except Exception as e:
         st.error(f'Error al procesar el archivo: {str(e)}')
@@ -256,10 +191,4 @@ else:
     st.warning('Por favor, cargue un archivo CSV para comenzar el análisis.')
 
 # Footer
-st.markdown("""
-    <div class="footer">
-        ---<br>
-        Desarrollado para el análisis de datos de sensores urbanos.<br>
-        Ubicación: Universidad EAFIT, Medellín, Colombia
-    </div>
-""", unsafe_allow_html=True)
+st.markdown('<footer>Desarrollado con inspiración en AuraLight ✨</footer>', unsafe_allow_html=True)
