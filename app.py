@@ -11,14 +11,44 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS
+# Custom CSS for aesthetics
 st.markdown("""
     <style>
+    /* Background gradient */
     .main {
+        background: linear-gradient(to bottom right, #ffe6f7, #e6ccff);
         padding: 2rem;
     }
+
+    /* Header and titles */
+    h1, h2, h3, h4 {
+        color: #993399;
+    }
+
+    /* Sidebar styling */
+    .css-6qob1r {
+        background: linear-gradient(to bottom, #ffccff, #e6b3ff);
+    }
+
+    /* Metrics styling */
+    .metric-container {
+        border-radius: 8px;
+        background: #f9e6ff;
+        padding: 1rem;
+    }
+
+    /* Alerts and warnings */
     .stAlert {
-        margin-top: 1rem;
+        background: #ffe6f7;
+        border-left: 5px solid #cc0099;
+    }
+
+    /* Footer */
+    .footer {
+        text-align: center;
+        color: #993399;
+        margin-top: 2rem;
+        font-size: 0.9rem;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -48,14 +78,14 @@ if uploaded_file is not None:
     try:
         # Load and process data
         df1 = pd.read_csv(uploaded_file)
-        
+
         # Renombrar columnas para simplificar
         column_mapping = {
             'temperatura {device="ESP32", name="Sensor 1"}': 'temperatura',
             'humedad {device="ESP32", name="Sensor 1"}': 'humedad'
         }
         df1 = df1.rename(columns=column_mapping)
-        
+
         df1['Time'] = pd.to_datetime(df1['Time'])
         df1 = df1.set_index('Time')
 
@@ -64,19 +94,19 @@ if uploaded_file is not None:
 
         with tab1:
             st.subheader('Visualización de Datos')
-            
+
             # Variable selector
             variable = st.selectbox(
                 "Seleccione variable a visualizar",
                 ["temperatura", "humedad", "Ambas variables"]
             )
-            
+
             # Chart type selector
             chart_type = st.selectbox(
                 "Seleccione tipo de gráfico",
                 ["Línea", "Área", "Barra"]
             )
-            
+
             # Create plot based on selection
             if variable == "Ambas variables":
                 st.write("### Temperatura")
@@ -86,7 +116,7 @@ if uploaded_file is not None:
                     st.area_chart(df1["temperatura"])
                 else:
                     st.bar_chart(df1["temperatura"])
-                    
+
                 st.write("### Humedad")
                 if chart_type == "Línea":
                     st.line_chart(df1["humedad"])
@@ -108,21 +138,21 @@ if uploaded_file is not None:
 
         with tab2:
             st.subheader('Análisis Estadístico')
-            
+
             # Variable selector for statistics
             stat_variable = st.radio(
                 "Seleccione variable para estadísticas",
                 ["temperatura", "humedad"]
             )
-            
+
             # Statistical summary
             stats_df = df1[stat_variable].describe()
-            
+
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 st.dataframe(stats_df)
-            
+
             with col2:
                 # Additional statistics
                 if stat_variable == "temperatura":
@@ -136,15 +166,15 @@ if uploaded_file is not None:
 
         with tab3:
             st.subheader('Filtros de Datos')
-            
+
             # Variable selector for filtering
             filter_variable = st.selectbox(
                 "Seleccione variable para filtrar",
                 ["temperatura", "humedad"]
             )
-            
+
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 # Minimum value filter
                 min_val = st.slider(
@@ -154,12 +184,12 @@ if uploaded_file is not None:
                     float(df1[filter_variable].mean()),
                     key="min_val"
                 )
-                
+
                 filtrado_df_min = df1[df1[filter_variable] > min_val]
                 st.write(f"Registros con {filter_variable} superior a", 
                         f"{min_val}{'°C' if filter_variable == 'temperatura' else '%'}:")
                 st.dataframe(filtrado_df_min)
-                
+
             with col2:
                 # Maximum value filter
                 max_val = st.slider(
@@ -169,7 +199,7 @@ if uploaded_file is not None:
                     float(df1[filter_variable].mean()),
                     key="max_val"
                 )
-                
+
                 filtrado_df_max = df1[df1[filter_variable] < max_val]
                 st.write(f"Registros con {filter_variable} inferior a",
                         f"{max_val}{'°C' if filter_variable == 'temperatura' else '%'}:")
@@ -187,16 +217,16 @@ if uploaded_file is not None:
 
         with tab4:
             st.subheader("Información del Sitio de Medición")
-            
+
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 st.write("### Ubicación del Sensor")
                 st.write("**Universidad EAFIT**")
                 st.write("- Latitud: 6.2006")
                 st.write("- Longitud: -75.5783")
                 st.write("- Altitud: ~1,495 metros sobre el nivel del mar")
-            
+
             with col2:
                 st.write("### Detalles del Sensor")
                 st.write("- Tipo: ESP32")
@@ -210,10 +240,12 @@ if uploaded_file is not None:
         st.error(f'Error al procesar el archivo: {str(e)}')
 else:
     st.warning('Por favor, cargue un archivo CSV para comenzar el análisis.')
-    
+
 # Footer
 st.markdown("""
-    ---
-    Desarrollado para el análisis de datos de sensores urbanos.
-    Ubicación: Universidad EAFIT, Medellín, Colombia
-""")
+    <div class="footer">
+        ---<br>
+        Desarrollado para el análisis de datos de sensores urbanos.<br>
+        Ubicación: Universidad EAFIT, Medellín, Colombia
+    </div>
+""", unsafe_allow_html=True)
