@@ -22,7 +22,13 @@ st.markdown("""
 
     /* Header and titles */
     h1, h2, h3, h4 {
-        color: #993399;
+        color: #ffb6c1; /* Pastel pink */
+        font-family: 'Times New Roman', Times, serif;
+    }
+
+    /* General text */
+    body, div, p, span, label {
+        font-family: 'Times New Roman', Times, serif;
     }
 
     /* Sidebar styling */
@@ -41,6 +47,13 @@ st.markdown("""
     .stAlert {
         background: #ffe6f7;
         border-left: 5px solid #cc0099;
+    }
+
+    /* Tabs background */
+    .stTabs [role="tablist"] {
+        background-color: #dab3ff; /* Light purple */
+        padding: 0.5rem;
+        border-radius: 8px;
     }
 
     /* Footer */
@@ -235,6 +248,7 @@ if uploaded_file is not None:
                 st.write("  * Humedad (%)")
                 st.write("- Frecuencia de medición: Según configuración")
                 st.write("- Ubicación: Campus universitario")
+
 
     except Exception as e:
         st.error(f'Error al procesar el archivo: {str(e)}')
