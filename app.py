@@ -1,7 +1,6 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-from datetime import datetime
 
 # Configuración de la página
 st.set_page_config(
@@ -67,21 +66,16 @@ uploaded_file = st.file_uploader('Sube un archivo CSV con los datos:', type=['cs
 
 if uploaded_file is not None:
     try:
-        # Carga y procesamiento de datos
-        df1 = pd.read_csv(uploaded_file)
+        # Carga de datos
+        df = pd.read_csv(uploaded_file)
 
-        # Renombrar columnas para simplificar
-        column_mapping = {
-            'temperatura {device="ESP32", name="Sensor 1"}': 'temperatura',
-            'humedad {device="ESP32", name="Sensor 1"}': 'humedad'
-        }
-        df1 = df1.rename(columns=column_mapping)
-        df1['Time'] = pd.to_datetime(df1['Time'])
-        df1 = df1.set_index('Time')
+        # Asegurar que las columnas clave existan
+        expected_columns = ['Time', 'temperatura', 'humedad']
+        if all(col in df.columns for col in expected_columns):
+            df['Time'] = pd.to_datetime(df['Time'])
+            df = df.set_index('Time')
 
-        # Contenedor principal
-        with st.container():
-            # Tabs para organización
+            # Tabs para organizar la información
             tab1, tab2, tab3 = st.tabs(["📊 Gráficos", "📋 Estadísticas", "🔍 Filtros"])
 
             with tab1:
@@ -89,13 +83,13 @@ if uploaded_file is not None:
                 variable = st.selectbox("Selecciona la variable a visualizar:", ["temperatura", "humedad"])
                 tipo_grafico = st.selectbox("Selecciona el tipo de gráfico:", ["Línea", "Área", "Barra"])
 
-                # Generar gráficos con Plotly
+                # Generar gráfico según selección
                 if tipo_grafico == "Línea":
-                    fig = px.line(df1, y=variable, title=f'{variable.capitalize()} a lo largo del tiempo', markers=True)
+                    fig = px.line(df, y=variable, title=f'{variable.capitalize()} a lo largo del tiempo', markers=True)
                 elif tipo_grafico == "Área":
-                    fig = px.area(df1, y=variable, title=f'{variable.capitalize()} a lo largo del tiempo')
+                    fig = px.area(df, y=variable, title=f'{variable.capitalize()} a lo largo del tiempo')
                 else:
-                    fig = px.bar(df1, y=variable, title=f'{variable.capitalize()} a lo largo del tiempo')
+                    fig = px.bar(df, y=variable, title=f'{variable.capitalize()} a lo largo del tiempo')
 
                 fig.update_layout(
                     title_font=dict(size=20, color='#B2A898'),
@@ -110,19 +104,22 @@ if uploaded_file is not None:
             with tab2:
                 st.markdown('<div class="contenedor"><h3 style="text-align: center;">📋 Estadísticas Descriptivas</h3></div>', unsafe_allow_html=True)
                 variable_stats = st.radio("Selecciona la variable:", ["temperatura", "humedad"])
-                stats_df = df1[variable_stats].describe()
-                st.dataframe(stats_df.style.set_properties(**{'background-color': '#FAF2E9', 'color': '#B2A898'}))
+                stats = df[variable_stats].describe()
+                st.write(stats)
 
             with tab3:
                 st.markdown('<div class="contenedor"><h3 style="text-align: center;">🔍 Filtros de Datos</h3></div>', unsafe_allow_html=True)
                 variable_filtro = st.selectbox("Selecciona la variable para filtrar:", ["temperatura", "humedad"])
-                min_val = st.slider(f'Valor mínimo de {variable_filtro}:', float(df1[variable_filtro].min()), float(df1[variable_filtro].max()), float(df1[variable_filtro].mean()))
-                max_val = st.slider(f'Valor máximo de {variable_filtro}:', float(df1[variable_filtro].min()), float(df1[variable_filtro].max()), float(df1[variable_filtro].mean()))
+                min_val = st.slider(f'Valor mínimo de {variable_filtro}:', float(df[variable_filtro].min()), float(df[variable_filtro].max()), float(df[variable_filtro].mean()))
+                max_val = st.slider(f'Valor máximo de {variable_filtro}:', float(df[variable_filtro].min()), float(df[variable_filtro].max()), float(df[variable_filtro].mean()))
 
-                df_filtrado = df1[(df1[variable_filtro] >= min_val) & (df1[variable_filtro] <= max_val)]
-                st.dataframe(df_filtrado.style.set_properties(**{'background-color': '#FAF2E9', 'color': '#B2A898'}))
+                df_filtrado = df[(df[variable_filtro] >= min_val) & (df[variable_filtro] <= max_val)]
+                st.write(df_filtrado)
 
+        else:
+            st.error(f"El archivo debe contener las columnas: {expected_columns}")
     except Exception as e:
-        st.error(f'Error procesando el archivo: {str(e)}')
+        st.error(f'Ocurrió un error al procesar el archivo: {str(e)}')
 else:
-    st.warning('Por favor sube un archivo CSV para empezar el análisis.')
+    st.info('Por favor, sube un archivo CSV para comenzar.')
+
