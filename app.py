@@ -2,6 +2,24 @@ import pandas as pd
 import streamlit as st
 from datetime import datetime
 
+# Función para estilizar DataFrame de temperatura
+def style_temp(df):
+    return df.style.set_table_styles([
+        {'selector': 'thead', 'props': [('background-color', '#B2A898'), ('color', 'white'), ('font-weight', 'bold')]},
+        {'selector': 'tbody tr:nth-child(even)', 'props': [('background-color', '#F0EBDD')]},
+        {'selector': 'tbody tr:nth-child(odd)', 'props': [('background-color', '#FAF2E9')]},
+        {'selector': 'tbody td', 'props': [('color', '#5A4F3E')]}
+    ])
+
+# Función para estilizar DataFrame de humedad
+def style_humidity(df):
+    return df.style.set_table_styles([
+        {'selector': 'thead', 'props': [('background-color', '#85B2B8'), ('color', 'white'), ('font-weight', 'bold')]},
+        {'selector': 'tbody tr:nth-child(even)', 'props': [('background-color', '#D9EBEC')]},
+        {'selector': 'tbody tr:nth-child(odd)', 'props': [('background-color', '#EAF4F5')]},
+        {'selector': 'tbody td', 'props': [('color', '#3A565B')]}
+    ])
+
 # Configuración de la página ✨
 st.set_page_config(
     page_title="Análisis de Datos de Sensores ✨",
@@ -101,7 +119,10 @@ if uploaded_file is not None:
 
             # Mostrar datos crudos ✨
             if st.checkbox("Mostrar datos crudos ✨"):
-                st.write(df)
+                if variable == "temperatura":
+                    st.dataframe(style_temp(df))
+                else:
+                    st.dataframe(style_humidity(df))
 
         # Tab de estadísticas ✨
         with tab2:
@@ -136,7 +157,10 @@ if uploaded_file is not None:
                     float(df[variable].mean())
                 )
                 filtrado_min = df[df[variable] > min_val]
-                st.dataframe(filtrado_min)
+                if variable == "temperatura":
+                    st.dataframe(style_temp(filtrado_min))
+                else:
+                    st.dataframe(style_humidity(filtrado_min))
 
             with col2:
                 max_val = st.slider(
@@ -146,7 +170,10 @@ if uploaded_file is not None:
                     float(df[variable].mean())
                 )
                 filtrado_max = df[df[variable] < max_val]
-                st.dataframe(filtrado_max)
+                if variable == "temperatura":
+                    st.dataframe(style_temp(filtrado_max))
+                else:
+                    st.dataframe(style_humidity(filtrado_max))
 
             # Descargar datos filtrados ✨
             if st.button("Descargar datos filtrados ✨"):
